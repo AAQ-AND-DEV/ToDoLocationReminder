@@ -10,6 +10,7 @@ import android.view.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.DialogFragment
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
@@ -18,13 +19,17 @@ import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
+import com.udacity.project4.utils.ConfirmLocationListener
+import com.udacity.project4.utils.SelectLocationDialogFragment
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 
-class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
+const val CONFIRM_DIALOG_TAG = 47
+class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, ConfirmLocationListener {
 
     private val DEFAULT_ZOOM = 12f
     private val TAG = SelectLocationFragment::class.java.simpleName
+
 
     //Use Koin to get the view model of the SaveReminder
     override val _viewModel: SaveReminderViewModel by inject()
@@ -39,6 +44,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     private var locationPermissionGranted: Boolean = false
     private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
 
+    private var locationConfirmed = false
     // GeoDataClient deprecated (and probably not necessary for this project
     // for GeoDataClient
     // private lateinit var mGeoDataClient : GeoDataClient
@@ -81,11 +87,49 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             getDeviceLocation()
         }
 
+        setPoiClick(map!!)
         //        TODO: add style to the map
 
     }
 
+    override fun onConfirmLocation(dialog: DialogFragment) {
+        locationConfirmed = true
+    }
 
+    override fun onCancelLocation(dialog: DialogFragment) {
+        locationConfirmed = false
+    }
+
+    private fun setPoiClick(map: GoogleMap) {
+//       put a marker to location that the user selected
+
+        map.setOnPoiClickListener { poi ->
+            if (confirmClick()) {
+
+                val poiMarker = map.addMarker(
+                    MarkerOptions()
+                        .position(poi.latLng)
+                        .title(poi.name)
+                )
+                poiMarker.showInfoWindow()
+
+            }
+
+        }
+    }
+
+    private fun confirmClick(): Boolean {
+        showConfirmDialog()
+        return locationConfirmed
+    }
+
+    private fun showConfirmDialog(){
+        val confirmFragment = SelectLocationDialogFragment()
+        confirmFragment.setTargetFragment(this, CONFIRM_DIALOG_TAG)
+        if (parentFragmentManager!= null){
+            confirmFragment.show(parentFragmentManager, "confirmation")
+        }
+    }
 
     private fun onLocationSelected() {
         //        TODO: When the user confirms on the selected location,
@@ -109,7 +153,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                                     LatLng(
                                         lastKnownLocation!!.latitude,
                                         lastKnownLocation!!.longitude
-                                    ), DEFAULT_ZOOM.toFloat()
+                                    ), DEFAULT_ZOOM
                                 )
                             )
                         }
@@ -118,7 +162,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                         Log.e(TAG, "Exception: %s", task.exception)
                         map?.moveCamera(
                             CameraUpdateFactory
-                                .newLatLngZoom(defaultLocation, DEFAULT_ZOOM.toFloat())
+                                .newLatLngZoom(defaultLocation, DEFAULT_ZOOM)
                         )
                         map?.uiSettings?.isMyLocationButtonEnabled = false
                     }
