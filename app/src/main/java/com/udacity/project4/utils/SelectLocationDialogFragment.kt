@@ -5,11 +5,12 @@ import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
+import com.google.android.gms.maps.model.PointOfInterest
 import com.udacity.project4.R
 import java.lang.ClassCastException
 import java.lang.IllegalStateException
 
-class SelectLocationDialogFragment : DialogFragment() {
+class SelectLocationDialogFragment(private val poi: PointOfInterest) : DialogFragment() {
 
     private lateinit var mListener: ConfirmLocationListener
 
@@ -27,9 +28,9 @@ class SelectLocationDialogFragment : DialogFragment() {
             val builder = AlertDialog.Builder(it)
             builder.setMessage(R.string.alert_dialog_confirm_location)
                 .setPositiveButton(R.string.confirm)
-                    { dialog, which -> mListener.onConfirmLocation(this) }
+                    { dialog, which -> mListener.onConfirmLocation(this, poi) }
                 .setNegativeButton(R.string.cancel)
-                    { dialog, which -> mListener.onCancelLocation(this) }
+                    { dialog, which -> mListener.onCancelLocation(this, poi) }
 
             builder.create()
         } ?:throw IllegalStateException("Activity cannot be null")

@@ -1,0 +1,13 @@
+package com.udacity.project4.locationreminders.geofence
+
+import java.util.concurrent.TimeUnit
+
+internal object GeofencingConstants{
+    /**
+     * Used to set an expiration time for a geofence. After this amount of time, Location services
+     * stops tracking the geofence. For this sample, geofences expire after one hour.
+     */
+    val GEOFENCE_EXPIRATION_IN_MILLISECONDS: Long = TimeUnit.DAYS.toMillis(14)
+
+    const val GEOFENCE_RADIUS_IN_METERS = 100f
+}
