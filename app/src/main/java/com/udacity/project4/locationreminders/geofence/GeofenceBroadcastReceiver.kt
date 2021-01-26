@@ -1,8 +1,13 @@
 package com.udacity.project4.locationreminders.geofence
 
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
+import androidx.core.content.ContextCompat
+import com.udacity.project4.locationreminders.geofence.GeofenceTransitionsJobIntentService.Companion.enqueueWork
+import com.udacity.project4.utils.sendNotification
 
 /**
  * Triggered by the Geofence.  Since we can have many Geofences at once, we pull the request
@@ -13,11 +18,13 @@ import android.content.Intent
  * To do that you can use https://developer.android.com/reference/android/support/v4/app/JobIntentService to do that.
  *
  */
-
+private const val TAG = "GeofenceBroadcastRcvr"
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
 
-//TODO: implement the onReceive method to receive the geofencing events at the background
+        Log.d(TAG, "onReceive Called")
+//receive the geofencing events at the background, using GeofenceTransitionsJobIntentService
+        enqueueWork(context, intent)
 
     }
 }
