@@ -23,7 +23,7 @@ class ReminderListFragment : BaseFragment() {
     //use Koin to retrieve the ViewModel instance
     private val TAG = "ReminderListFragment"
     override val _viewModel: RemindersListViewModel by viewModel()
-    val authViewModel: AuthenticationViewModel by inject()
+    val authViewModel: AuthenticationViewModel by viewModel()
     private lateinit var binding: FragmentRemindersBinding
 
     override fun onCreateView(
@@ -36,10 +36,6 @@ class ReminderListFragment : BaseFragment() {
                 R.layout.fragment_reminders, container, false
             )
         binding.viewModel = _viewModel
-
-        if (authViewModel.authenticationState.value != AuthenticationViewModel.AuthenticationState.AUTHENTICATED){
-            navigateToAuthActivity()
-        }
 
         authViewModel._navigateToAuthActivity.observe(viewLifecycleOwner){
             if (it){

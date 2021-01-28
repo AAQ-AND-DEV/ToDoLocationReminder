@@ -55,6 +55,7 @@ class AuthenticationActivity : AppCompatActivity() {
             }
         }
 
+
         // create account and sign in using FirebaseUI
         binding.loginButton.setOnClickListener {
             launchSignInFlow()
