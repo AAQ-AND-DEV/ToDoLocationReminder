@@ -9,7 +9,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers
@@ -62,9 +62,9 @@ class SaveReminderFragmentTest : KoinTest{
     val permissionRule: GrantPermissionRule = GrantPermissionRule
         .grant(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
-//    @get:Rule
-//    val activityRule: ActivityTestRule<RemindersActivity> =
-//        ActivityTestRule(RemindersActivity::class.java)
+    @get:Rule
+    val activityRule: ActivityTestRule<RemindersActivity> =
+        ActivityTestRule(RemindersActivity::class.java)
 
     val viewModel : SaveReminderViewModel by inject()
     //private lateinit var viewModel: SaveReminderViewModel
@@ -140,30 +140,35 @@ class SaveReminderFragmentTest : KoinTest{
         //Given: launch SaveReminderFragment
         val scenario = launchFragmentInContainer<SaveReminderFragment>(Bundle(), R.style.AppTheme)
         val navController = mock(NavController::class.java)
+        navController.setGraph(R.navigation.nav_graph)
         scenario.onFragment {
             Navigation.setViewNavController(it.view!!, navController)
         }
         // viewModel populated with title and desc, lat, lon
-        viewModel.reminderTitle.value = "title1"
-        viewModel.reminderDescription.value = "desc1"
-        viewModel.latitude.value = 44.5
-        viewModel.longitude.value = 24.5
+//        viewModel.reminderTitle.value = "title1"
+//        viewModel.reminderDescription.value = "desc1"
+//        viewModel.latitude.value = 44.5
+//        viewModel.longitude.value = 24.5
+
+        onView(withId(R.id.reminderTitle)).perform((typeText("title1")), closeSoftKeyboard())
+        onView(withId(R.id.reminderDescription)).perform((typeText("desc1")), closeSoftKeyboard())
         //When: saveReminderClicked
         onView(withId(R.id.saveReminder)).perform(click())
         //Then: shows reminder saved toast
         //following relies on activityRule, which seemed to cause listFragment to open
-//        onView(withText(R.string.reminder_saved))
-//            .inRoot(withDecorView(not(activityRule.activity
-//            .window.decorView
-//            ))) .check(matches(isDisplayed()))
-        Thread.sleep(1000)
         onView(withText(R.string.reminder_saved))
-            .check(matches(withEffectiveVisibility(
-                ViewMatchers.Visibility.VISIBLE
-            )))
+            .inRoot(withDecorView(not(activityRule.activity
+            .window.decorView
+            ))) .check(matches(isDisplayed()))
+        //Thread.sleep(1000)
+//        onView(withText(R.string.reminder_saved))
+//            .check(matches(withEffectiveVisibility(
+//                ViewMatchers.Visibility.VISIBLE
+//            )))
         //Then: Navigation
-        verify(navController).navigate(SaveReminderFragmentDirections.actionSaveReminderFragmentToReminderListFragment())
-
+        //verify(navController).navigate(SaveReminderFragmentDirections.actionSaveReminderFragmentToReminderListFragment())
+        //assertThat(navController.currentDestination?.id, equals(R.id.reminderListFragment))
+        verify(navController).popBackStack()
 
     }
 }
