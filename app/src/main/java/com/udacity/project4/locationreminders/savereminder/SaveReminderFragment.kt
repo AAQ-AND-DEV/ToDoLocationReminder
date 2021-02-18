@@ -93,23 +93,28 @@ class SaveReminderFragment : BaseFragment() {
             val rdi = ReminderDataItem(
                 title, description, location, latitude, longitude
             )
-
+            Log.d(TAG, "rdi: $rdi" )
 
 //             2) save the reminder to the local db
             runBlocking {
+                Log.d(TAG, "calling validateAndSaveReminder()")
                 _viewModel.validateAndSaveReminder(rdi)
             }
 
             //check if reminder in local db
+            runBlocking{
+
             val reminderPresent = _viewModel.checkReminderPresent(rdi)
-            Log.d(TAG, "viewmodel returning $reminderPresent")
+                Log.d(TAG, "viewmodel returning $reminderPresent")
 //             1) If success, add a geofencing request
-            if (reminderPresent) {
-                Log.d(TAG, "isAdded: $isAdded")
-                runBlocking{
-                    checkPermissionsAndStartGeofencing(rdi)
+                if (reminderPresent) {
+                    Log.d(TAG, "isAdded: $isAdded")
+
+                        checkPermissionsAndStartGeofencing(rdi)
+
+                    Log.d(TAG, "isAdded: $isAdded")
                 }
-                Log.d(TAG, "isAdded: $isAdded")
+
             }
         }
     }
@@ -209,8 +214,10 @@ class SaveReminderFragment : BaseFragment() {
                     )
                         .show()
                     Log.e("Add Geofence", geofence.requestId)
+                    Log.d("geofence added", "about to navigate")
                     //navigate back to reminder list when geoFence added
                     _viewModel.navigationCommand.value = NavigationCommand.Back
+
                 }
                 addOnFailureListener {
                     Toast.makeText(

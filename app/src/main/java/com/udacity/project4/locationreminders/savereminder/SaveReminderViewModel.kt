@@ -41,7 +41,11 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
      * Validate the entered data then saves the reminder data to the DataSource
      */
     fun validateAndSaveReminder(reminderData: ReminderDataItem) {
-        if (validateEnteredData(reminderData)) {
+        Log.d(TAG,"calling validateEnteredData()")
+        val validated = validateEnteredData(reminderData)
+        Log.d(TAG, "validated: $validated")
+        if (validated) {
+            Log.d(TAG,"data validated")
             saveReminder(reminderData)
         }
     }
@@ -92,6 +96,7 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
                     reminderData.id
                 )
             )
+            Log.d(TAG, "data should be saved now")
             showLoading.value = false
             showToast.value = app.getString(R.string.reminder_saved)
 
