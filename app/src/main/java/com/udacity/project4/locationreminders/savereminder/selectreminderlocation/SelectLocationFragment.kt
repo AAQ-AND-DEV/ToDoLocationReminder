@@ -28,17 +28,17 @@ import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE
 import com.udacity.project4.locationreminders.savereminder.REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
-import com.udacity.project4.utils.ConfirmLocationListener
-import com.udacity.project4.utils.SelectLocationDialogFragment
-import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
+import com.udacity.project4.utils.*
 import org.koin.android.ext.android.inject
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 
 const val CONFIRM_DIALOG_TAG = 47
 private const val LOCATION_PERMISSION_INDEX = 0
 private const val BACKGROUND_LOCATION_PERMISSION_INDEX = 1
 
-class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, ConfirmLocationListener {
+class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, ConfirmLongClickLocationListener, ConfirmLocationListener {
 
     private val DEFAULT_ZOOM = 13f
     private val TAG = SelectLocationFragment::class.java.simpleName
@@ -126,8 +126,8 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, ConfirmLocati
         enableMyLocation()
 
         setPoiClick(map!!)
-        //        TODO: add style to the map
 
+        setLongClick(map!!)
     }
 
     /**
@@ -142,12 +142,34 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, ConfirmLocati
             requestForegroundAndBackgroundLocationPermissions()
         }
     }
+
     override fun onConfirmLocation(dialog: DialogFragment, poi: PointOfInterest) {
 
         onLocationSelected(poi)
     }
 
     override fun onCancelLocation(dialog: DialogFragment, poi: PointOfInterest) {
+        selectedMarker?.remove()
+    }
+
+    private fun setLongClick(map: GoogleMap){
+        map.setOnMapLongClickListener { latLon ->
+            val longClickMarker = map.addMarker(
+                MarkerOptions()
+                    .position(latLon)
+                    .title(latLon.toString())
+            )
+            selectedMarker = longClickMarker
+            longClickMarker?.showInfoWindow()
+            confirmLongClick(latLon)
+        }
+
+    }
+    override fun onConfirmLocation(dialog: DialogFragment, latLon: LatLng) {
+        onLocationSelected(latLon)
+    }
+
+    override fun onCancelLocation(dialog: DialogFragment, latLon: LatLng) {
         selectedMarker?.remove()
     }
 
@@ -168,11 +190,20 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, ConfirmLocati
 
     private fun confirmClick(myPoi: PointOfInterest) {
         showConfirmDialog(myPoi)
-
     }
 
     private fun showConfirmDialog(myPoi: PointOfInterest){
         val confirmFragment = SelectLocationDialogFragment(myPoi)
+        confirmFragment.setTargetFragment(this, CONFIRM_DIALOG_TAG)
+        confirmFragment.show(parentFragmentManager, "confirmation")
+
+    }
+    private fun confirmLongClick(latLng: LatLng) {
+        showConfirmDialog(latLng)
+    }
+
+    private fun showConfirmDialog(latLng: LatLng){
+        val confirmFragment = SelectLongClickLocationDialogFragment(latLng)
         confirmFragment.setTargetFragment(this, CONFIRM_DIALOG_TAG)
         confirmFragment.show(parentFragmentManager, "confirmation")
 
@@ -186,6 +217,22 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, ConfirmLocati
         _viewModel.latitude.value = poi.latLng.latitude
         _viewModel.longitude.value = poi.latLng.longitude
         findNavController().popBackStack()
+    }
+
+    private fun onLocationSelected(latLng: LatLng){
+        _viewModel.selectedLocation.value = latLng
+
+        _viewModel.reminderSelectedLocationStr.value = latLng.clipString()
+        _viewModel.latitude.value = latLng.latitude
+        _viewModel.longitude.value = latLng.longitude
+        findNavController().popBackStack()
+    }
+
+    fun LatLng.clipString(): String{
+        val roundedLat = BigDecimal(this.latitude).setScale(5, RoundingMode.HALF_EVEN)
+        val roundedLon = BigDecimal(this.longitude).setScale(5, RoundingMode.HALF_EVEN)
+        return "$roundedLat, $roundedLon"
+
     }
 
     //Code provided from documentation:
