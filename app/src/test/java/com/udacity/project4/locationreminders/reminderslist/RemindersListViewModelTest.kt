@@ -12,10 +12,12 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.core.context.stopKoin
 
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
@@ -41,6 +43,11 @@ class RemindersListViewModelTest {
         val reminder3 = ReminderDTO("Title3", "Desc3", "Loc3", 42.5, 42.5)
         remindersRepo.addReminders(reminder1, reminder2, reminder3)
         remindersListViewModel = RemindersListViewModel(app, remindersRepo)
+    }
+
+    @After
+    fun stop(){
+        stopKoin()
     }
 
     @Test

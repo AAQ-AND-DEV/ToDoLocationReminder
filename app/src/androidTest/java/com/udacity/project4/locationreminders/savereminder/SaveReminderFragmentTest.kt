@@ -72,6 +72,8 @@ class SaveReminderFragmentTest : KoinTest{
     private lateinit var auth: FirebaseAuth
     val authViewModel: AuthenticationViewModel by inject()
 
+    val repo: FakeAndroidTestRepository by inject()
+
     val testModule = module{
         viewModel{
             SaveReminderViewModel(
@@ -103,7 +105,7 @@ class SaveReminderFragmentTest : KoinTest{
         stopKoin()
         startKoin {
             androidContext(getApplicationContext())
-            loadKoinModules(testModule)
+            modules(testModule)
             //modules(listOf(testModule))
         }
 //        auth = FirebaseAuth.getInstance()
@@ -114,9 +116,9 @@ class SaveReminderFragmentTest : KoinTest{
 
     @After
     fun tearDown() {
-//        runBlocking{
-//            repo.deleteAllReminders()
-//        }
+        runBlocking{
+            repo.deleteAllReminders()
+        }
         stopKoin()
     }
 
@@ -144,11 +146,6 @@ class SaveReminderFragmentTest : KoinTest{
         scenario.onFragment {
             Navigation.setViewNavController(it.view!!, navController)
         }
-        // viewModel populated with title and desc, lat, lon
-//        viewModel.reminderTitle.value = "title1"
-//        viewModel.reminderDescription.value = "desc1"
-//        viewModel.latitude.value = 44.5
-//        viewModel.longitude.value = 24.5
 
         onView(withId(R.id.reminderTitle)).perform((typeText("title1")), closeSoftKeyboard())
         onView(withId(R.id.reminderDescription)).perform((typeText("desc1")), closeSoftKeyboard())
@@ -160,14 +157,6 @@ class SaveReminderFragmentTest : KoinTest{
             .inRoot(withDecorView(not(activityRule.activity
             .window.decorView
             ))) .check(matches(isDisplayed()))
-        //Thread.sleep(1000)
-//        onView(withText(R.string.reminder_saved))
-//            .check(matches(withEffectiveVisibility(
-//                ViewMatchers.Visibility.VISIBLE
-//            )))
-        //Then: Navigation
-        //verify(navController).navigate(SaveReminderFragmentDirections.actionSaveReminderFragmentToReminderListFragment())
-        //assertThat(navController.currentDestination?.id, equals(R.id.reminderListFragment))
         verify(navController).popBackStack()
 
     }
