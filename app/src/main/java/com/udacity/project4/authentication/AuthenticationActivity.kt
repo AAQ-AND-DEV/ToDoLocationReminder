@@ -5,18 +5,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.addCallback
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
-import androidx.navigation.Navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
 import com.udacity.project4.R
 import com.udacity.project4.databinding.ActivityAuthenticationBinding
-import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import org.koin.android.ext.android.inject
 
 /**
@@ -50,6 +46,7 @@ class AuthenticationActivity : AppCompatActivity() {
 //            }
 //        }
         viewModel._navigateToAuthActivity.observe(this){
+            Log.d(TAG, "navToAuth val in AuthActivity: $it")
             if (!it){
                 finish()
             }

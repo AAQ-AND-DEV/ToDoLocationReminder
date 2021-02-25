@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import androidx.core.app.ActivityCompat.invalidateOptionsMenu
 import androidx.databinding.DataBindingUtil
 import com.firebase.ui.auth.AuthUI
 import com.udacity.project4.R
@@ -16,7 +15,6 @@ import com.udacity.project4.databinding.FragmentRemindersBinding
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import com.udacity.project4.utils.setTitle
 import com.udacity.project4.utils.setup
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ReminderListFragment : BaseFragment() {
@@ -36,8 +34,13 @@ class ReminderListFragment : BaseFragment() {
                 R.layout.fragment_reminders, container, false
             )
         binding.viewModel = _viewModel
-
+        //testing automatic sign in to prevent authActivity from launching. works here, not in test
+//        val auth = FirebaseAuth.getInstance()
+//        auth.signInWithEmailAndPassword("tet@test.com", "123456789")
+//        Thread.sleep(4000)
+        Log.d(TAG, "navToAuth val in ReminderListFragment: ${authViewModel._navigateToAuthActivity.value}")
         authViewModel._navigateToAuthActivity.observe(viewLifecycleOwner){
+
             if (it){
                 navigateToAuthActivity()
             }
@@ -65,6 +68,7 @@ class ReminderListFragment : BaseFragment() {
         //load the reminders list on the ui
         _viewModel.loadReminders()
 //        this.requireActivity().invalidateOptionsMenu()
+        Log.d(TAG, "navToAuth val in ReminderListFragment: ${authViewModel._navigateToAuthActivity.value}")
     }
 
     private fun navigateToAddReminder() {

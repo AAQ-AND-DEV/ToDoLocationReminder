@@ -1,6 +1,7 @@
 package com.udacity.project4
 
 import android.app.Application
+import android.util.Log
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
@@ -11,7 +12,6 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.rule.ActivityTestRule
 import androidx.test.rule.GrantPermissionRule
 import com.google.firebase.auth.FirebaseAuth
@@ -48,6 +48,7 @@ import org.koin.test.inject
 class RemindersActivityTest :
     AutoCloseKoinTest() {// Extended Koin Test - embed autoclose @after method to close Koin after every test
 
+    private val TAG = "RemindersActivityTest"
     private lateinit var repository: ReminderDataSource
     private lateinit var appContext: Application
 
@@ -74,6 +75,11 @@ class RemindersActivityTest :
     val backgroundPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
         android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
     )
+    init{
+        //sign out
+        auth = FirebaseAuth.getInstance()
+        auth.signOut()
+    }
 
     /**
      * As we use Koin as a Service Locator Library to develop our code, we'll also use Koin to test our code.
@@ -107,9 +113,7 @@ class RemindersActivityTest :
             androidContext(getApplicationContext())
             loadKoinModules(myModule)
         }
-        //sign in
-        auth = FirebaseAuth.getInstance()
-        auth.signOut()
+
 
         //Get our real repository
         repository = get()
@@ -128,12 +132,12 @@ class RemindersActivityTest :
 
     @Before
     fun login() = runBlocking {
-        auth = FirebaseAuth.getInstance()
+        Log.d(TAG, "login running")
         auth.signInWithEmailAndPassword("tet@test.com", "123456789")
-        delay(2000)
+        delay(4000)
     }
 
-//    @Before
+    //    @Before
 //    fun getDevice(){
 //        device = UiDevice.getInstance(getInstrumentation())
 //    }
@@ -144,15 +148,12 @@ class RemindersActivityTest :
         IdlingRegistry.getInstance().unregister(EspressoIdlingResource.countingIdlingResource)
     }
 
-    @After
-    fun logout() {
-        auth.signOut()
-    }
 
-    @Test
-    fun fakeTest(){
+//    @Test
+//    fun fakeTest() {
+//
+//    }
 
-    }
     //    TODO: add End to End testing to the app
     @Test
     fun addReminder() = runBlocking {
@@ -161,7 +162,7 @@ class RemindersActivityTest :
         dataBindingIdlingResource.monitorActivity(activityScenario)
 
         //onView(withId(R.id.login_button)).perform(click())
-        delay(4000)
+        //delay(4000)
         onView(withId(R.id.addReminderFAB)).perform(click())
         onView(withId(R.id.reminderTitle)).perform(typeText("Title1"))
         onView(withId(R.id.reminderDescription)).perform(typeText("Desc1"), closeSoftKeyboard())
@@ -184,4 +185,5 @@ class RemindersActivityTest :
 
         activityScenario.close()
     }
+
 }
