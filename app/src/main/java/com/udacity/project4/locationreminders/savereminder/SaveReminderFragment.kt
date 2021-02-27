@@ -100,7 +100,7 @@ class SaveReminderFragment : BaseFragment() {
                 Log.d(TAG, "calling validateAndSaveReminder()")
                 _viewModel.validateAndSaveReminder(rdi)
             }
-
+            Thread.sleep(1000)
             //check if reminder in local db
             runBlocking{
 
