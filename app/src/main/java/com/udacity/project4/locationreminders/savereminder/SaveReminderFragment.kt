@@ -100,21 +100,33 @@ class SaveReminderFragment : BaseFragment() {
                 Log.d(TAG, "calling validateAndSaveReminder()")
                 _viewModel.validateAndSaveReminder(rdi)
             }
-            Thread.sleep(1000)
-            //check if reminder in local db
-            runBlocking{
+//            Thread.sleep(1000)
+//            //check if reminder in local db
+//            runBlocking{
+//
+//            val reminderPresent = _viewModel.checkReminderPresent(rdi)
+//                Log.d(TAG, "viewmodel returning $reminderPresent")
+////             1) If success, add a geofencing request
+//                if (reminderPresent) {
+//                    Log.d(TAG, "isAdded: $isAdded")
+//
+//                        checkPermissionsAndStartGeofencing(rdi)
+//
+//                    Log.d(TAG, "isAdded: $isAdded")
+//                }
+//
+//            }
+            _viewModel.checkReminderPresent(rdi)
 
-            val reminderPresent = _viewModel.checkReminderPresent(rdi)
-                Log.d(TAG, "viewmodel returning $reminderPresent")
-//             1) If success, add a geofencing request
-                if (reminderPresent) {
-                    Log.d(TAG, "isAdded: $isAdded")
+        }
 
-                        checkPermissionsAndStartGeofencing(rdi)
-
-                    Log.d(TAG, "isAdded: $isAdded")
-                }
-
+        _viewModel.savedReminder.observe(viewLifecycleOwner){
+            rdi->
+            if (rdi!=null){
+                Log.d(TAG, "starting geofencing for rdi with id: ${rdi.id}")
+                checkPermissionsAndStartGeofencing(rdi)
+            } else{
+                Log.d(TAG, "rdi is null")
             }
         }
     }
@@ -215,6 +227,8 @@ class SaveReminderFragment : BaseFragment() {
                         .show()
                     Log.e("Add Geofence", geofence.requestId)
                     Log.d("geofence added", "about to navigate")
+                    //reset savedReminder in viewModel to null
+                    _viewModel.savedReminder.value = null
                     //navigate back to reminder list when geoFence added
                     _viewModel.navigationCommand.value = NavigationCommand.Back
 

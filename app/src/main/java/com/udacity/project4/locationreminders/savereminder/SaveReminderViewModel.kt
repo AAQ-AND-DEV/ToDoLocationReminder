@@ -12,6 +12,7 @@ import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
+import com.udacity.project4.locationreminders.data.dto.toRDI
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import kotlinx.coroutines.*
 
@@ -24,6 +25,7 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
     val selectedLocation = MutableLiveData<LatLng>()
     val latitude = MutableLiveData<Double>()
     val longitude = MutableLiveData<Double>()
+    val savedReminder = MutableLiveData<ReminderDataItem>()
 
     private val TAG = this.javaClass.simpleName
 
@@ -38,6 +40,7 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
         selectedLocation.value = null
         latitude.value = null
         longitude.value = null
+        savedReminder.value = null
     }
 
     /**
@@ -53,34 +56,42 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
         }
     }
 
-    fun checkReminderPresent(reminderData: ReminderDataItem): Boolean {
+    fun checkReminderPresent(reminderData: ReminderDataItem) {
         Log.d(TAG, "id is ${reminderData.id}")
 
-        var present = false
         val result = viewModelScope.launch {
-            present = getReminderStatus(reminderData.id)
+            getReminderStatus(reminderData.id)
         }
 
-        //Log.d(TAG, "$data is data, $present is present")
+        Log.d(TAG, "$result is data")
 
-        return present
     }
 
-    suspend fun getReminderStatus(id: String): Boolean {
-        var data: Result<ReminderDTO>?
-        var present = false
-        data = runBlocking {
+    suspend fun getReminderStatus(id: String){
+//        var data: Result<ReminderDTO>?
+//        var present = false
+//        data = runBlocking {
+//            dataSource.getReminder(id)
+//        }
+//        val actualData = data
+//        present = if (actualData is Result.Success<*>) {
+//            Log.d(TAG, "$actualData is Result.Success, present: $present")
+//            true
+//        } else {
+//            false
+//        }
+//        Log.d(TAG, "$actualData is Result.Success, present: $present")
+//        return present
+        val reminder: Result<ReminderDTO>?
+
+        reminder = viewModelScope.async{
             dataSource.getReminder(id)
+        }.await()
+
+        Log.d(TAG, "current reminder via async after await: ${reminder}")
+        if (reminder is Result.Success){
+            savedReminder.value = reminder.data.toRDI()
         }
-        val actualData = data
-        present = if (actualData is Result.Success<*>) {
-            Log.d(TAG, "$actualData is Result.Success, present: $present")
-            true
-        } else {
-            false
-        }
-        Log.d(TAG, "$actualData is Result.Success, present: $present")
-        return present
     }
 
     /**
