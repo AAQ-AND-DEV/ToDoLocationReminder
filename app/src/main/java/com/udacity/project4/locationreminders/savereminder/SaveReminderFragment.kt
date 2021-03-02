@@ -29,6 +29,7 @@ import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
 import com.udacity.project4.locationreminders.geofence.GeofencingConstants
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
+import kotlinx.android.synthetic.main.fragment_save_reminder.*
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.inject
 
@@ -117,7 +118,7 @@ class SaveReminderFragment : BaseFragment() {
 //
 //            }
             _viewModel.checkReminderPresent(rdi)
-
+            saveReminder.isEnabled = false
         }
 
         _viewModel.savedReminder.observe(viewLifecycleOwner){
@@ -217,7 +218,6 @@ class SaveReminderFragment : BaseFragment() {
                 .addGeofence(geofence)
                 .build()
 
-
             geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
                 addOnSuccessListener {
                     Toast.makeText(
@@ -229,9 +229,10 @@ class SaveReminderFragment : BaseFragment() {
                     Log.d("geofence added", "about to navigate")
                     //reset savedReminder in viewModel to null
                     _viewModel.savedReminder.value = null
+                    //re-enable saveReminderButton
+                    saveReminder.isEnabled = true
                     //navigate back to reminder list when geoFence added
                     _viewModel.navigationCommand.value = NavigationCommand.Back
-
                 }
                 addOnFailureListener {
                     Toast.makeText(
@@ -241,6 +242,8 @@ class SaveReminderFragment : BaseFragment() {
                     if ((it.message != null)) {
                         Log.w(TAG, it.message!!)
                     }
+                    //re-enable saveReminderButton
+                    saveReminder.isEnabled = true
                 }
             }
         }

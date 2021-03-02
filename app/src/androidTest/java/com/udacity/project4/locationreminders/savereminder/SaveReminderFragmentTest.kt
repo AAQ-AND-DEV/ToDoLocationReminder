@@ -27,7 +27,9 @@ import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersDatabase
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
+import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.not
 import org.junit.After
@@ -65,12 +67,6 @@ class SaveReminderFragmentTest : KoinTest{
     @get:Rule
     val activityRule: ActivityTestRule<RemindersActivity> =
         ActivityTestRule(RemindersActivity::class.java)
-
-    val viewModel : SaveReminderViewModel by inject()
-    //private lateinit var viewModel: SaveReminderViewModel
-
-    private lateinit var auth: FirebaseAuth
-    val authViewModel: AuthenticationViewModel by inject()
 
     val repo: FakeAndroidTestRepository by inject()
 
@@ -124,7 +120,8 @@ class SaveReminderFragmentTest : KoinTest{
 
     //Test Navigation
     @Test
-    fun clickChooseLocation_navigateToSelectLocationFragment(){
+    fun clickChooseLocation_navigateToSelectLocationFragment() {
+
         //Given: SaveReminderFragment
         val scenario = launchFragmentInContainer<SaveReminderFragment>(Bundle(), R.style.AppTheme)
         val navController = mock(NavController::class.java)
@@ -142,7 +139,7 @@ class SaveReminderFragmentTest : KoinTest{
         //Given: launch SaveReminderFragment
         val scenario = launchFragmentInContainer<SaveReminderFragment>(Bundle(), R.style.AppTheme)
         val navController = mock(NavController::class.java)
-        navController.setGraph(R.navigation.nav_graph)
+        //navController.setGraph(R.navigation.nav_graph)
         scenario.onFragment {
             Navigation.setViewNavController(it.view!!, navController)
         }
@@ -158,6 +155,6 @@ class SaveReminderFragmentTest : KoinTest{
             .window.decorView
             ))) .check(matches(isDisplayed()))
         verify(navController).popBackStack()
-
+        //Thread.sleep(3000)
     }
 }
